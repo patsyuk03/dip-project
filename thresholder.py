@@ -13,7 +13,7 @@ def update(new):
  
 def main():
     colors = ['lR', 'lG', 'lB', 'uR', 'uG', 'uB']
-    value = [0, 0, 0, 255, 50, 255]
+    value = [0, 0, 0, 255, 255, 255]
     bounds = {}
     for idx, color in enumerate(colors):
         bounds[color] = value[idx]
@@ -27,8 +27,8 @@ def main():
         # image_rgb = cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards/card_{str(n).zfill(2)}.png"))
         image_rgb = cv2.imread(os.path.join(SCRIPT_PATH, f"images/carcassonne_cards.png"))
 
-
-        image = cv2.cvtColor(image_rgb, cv2.COLOR_BGR2HSV)
+        image = cv2.cvtColor(image_rgb, cv2.COLOR_BGR2RGB)
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
 
         # kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         # image_grey = cv2.filter2D(image_grey, -1, kernel)
