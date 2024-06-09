@@ -10,6 +10,8 @@ class Map:
         self.map_size = map_size
         self.map = self.create_map()
         self.image = np.zeros((map_size*70, map_size*70, 3), np.uint8)+255
+        self.image_castles = np.zeros((map_size*70, map_size*70, 2), np.uint8)+255
+        self.image_roads = np.zeros((map_size*70, map_size*70, 2), np.uint8)+255
         # card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/initial_card_2.png")), cv2.COLOR_BGR2RGB)
         # card_coords = (
         #     map_size//2*70,
@@ -46,6 +48,9 @@ class Map:
                     self.map[place_number].features["RIGHT"] = card.features["LEFT"]
             
             self.image[location[1]:location[1]+70, location[0]:location[0]+70, :] = card.image_with_features
+            self.get_thresh_castles()
+            self.get_thresh_roads()
+            
 
     def find_available_option(self, image):
         card = Card(image)
@@ -69,6 +74,24 @@ class Map:
                 card = image[x:x+70, y:y+70, :]
                 card_coords = (y ,x)
                 self.update_map(card, card_coords)
+
+    def get_thresh_roads(self):
+        out = cv2.cvtColor(self.image, cv2.COLOR_RGB2HSV)
+        out = cv2.inRange(out, np.array([17, 18, 142]), np.array([38, 41, 175]))
+
+        kernel = np.array([[0,1,0], [1,1,1], [0,1,0]], np.uint8)
+        out = cv2.morphologyEx(out, cv2.MORPH_CLOSE, kernel)
+        out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
+        out = cv2.dilate(out, kernel, iterations=2)
+        self.image_roads = out 
+
+    def get_thresh_castles(self):
+        out = cv2.cvtColor(self.image, cv2.COLOR_RGB2HSV)
+        out = cv2.inRange(out, np.array([0, 0, 0]), np.array([20, 255, 255]))
+
+        kernel = np.array([[0,1,0], [1,1,1], [0,1,0]], np.uint8)
+        out = cv2.erode(out, kernel, iterations=2) 
+        self.image_castles = out 
 
 
 
