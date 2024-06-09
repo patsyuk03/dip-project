@@ -10,13 +10,13 @@ class Map:
         self.map_size = map_size
         self.map = self.create_map()
         self.image = np.zeros((map_size*70, map_size*70, 3), np.uint8)+255
-        card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/initial_card.png")), cv2.COLOR_BGR2RGB)
-        card_coords = (
-            map_size//2*70,
-            map_size//2*70
-        )
-        self.image[card_coords[0]:card_coords[0]+70, card_coords[1]:card_coords[1]+70, :] = card
-        self.update_map(card, card_coords)
+        # card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/initial_card_2.png")), cv2.COLOR_BGR2RGB)
+        # card_coords = (
+        #     map_size//2*70,
+        #     map_size//2*70
+        # )
+        # self.image[card_coords[0]:card_coords[0]+70, card_coords[1]:card_coords[1]+70, :] = card
+        # self.update_map(card, card_coords)
         
     def create_map(self):
         map_list = list()
@@ -25,24 +25,27 @@ class Map:
                 card = Card()
                 card.location = (x*70, y*70)
                 map_list.append(card)
-        return  map_list
+        return map_list
 
     def update_map(self, image, location):
         card = Card(image)
+        # cv2.imshow("test", card.image_with_features)
         card.location = location
-        for place_number, place in enumerate(self.map):
-            if place.location == card.location:
-                self.map[place_number] = card
-            elif place.location == (location[0], location[1]+70):
-                self.map[place_number].features["UP"] = card.features["DOWN"]
-            elif place.location == (location[0], location[1]-70):
-                self.map[place_number].features["DOWN"] = card.features["UP"]
-            elif place.location == (location[0]+70, location[1]):
-                self.map[place_number].features["LEFT"] = card.features["RIGHT"]
-            elif place.location == (location[0]-70, location[1]):
-                self.map[place_number].features["RIGHT"] = card.features["LEFT"]
-        
-        self.image[location[1]:location[1]+70, location[0]:location[0]+70, :] = image
+        feature_list = [card.features["UP"], card.features["DOWN"], card.features["LEFT"], card.features["RIGHT"]]
+        if feature_list != ["", "", "", ""]:
+            for place_number, place in enumerate(self.map):
+                if place.location == card.location:
+                    self.map[place_number] = card
+                elif place.location == (location[0], location[1]+70):
+                    self.map[place_number].features["UP"] = card.features["DOWN"]
+                elif place.location == (location[0], location[1]-70):
+                    self.map[place_number].features["DOWN"] = card.features["UP"]
+                elif place.location == (location[0]+70, location[1]):
+                    self.map[place_number].features["LEFT"] = card.features["RIGHT"]
+                elif place.location == (location[0]-70, location[1]):
+                    self.map[place_number].features["RIGHT"] = card.features["LEFT"]
+            
+            self.image[location[1]:location[1]+70, location[0]:location[0]+70, :] = card.image_with_features
 
     def find_available_option(self, image):
         card = Card(image)
@@ -57,5 +60,17 @@ class Map:
 
                     options.append(place.location)
         return options
+    
+    def get_map_from_camera(self, image):
+        row, col, c = image.shape
+
+        for x in range(0, row-70, 70):
+            for y in range(0, col-70, 70):
+                card = image[x:x+70, y:y+70, :]
+                card_coords = (y ,x)
+                self.update_map(card, card_coords)
+
+
+
 
 

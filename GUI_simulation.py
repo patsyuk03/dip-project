@@ -4,9 +4,8 @@ import numpy as np
 import cv2
 import os 
 import random
-from Card import Card
-from Map import Map
-from Camera import Camera
+from Card_simulation import Card
+from Map_simulation import Map
 
 SCRIPT_PATH = os.path.dirname(__file__)
 
@@ -16,14 +15,11 @@ class GUI:
 
         self.root = tk.Tk()
 
-        self.camera = Camera()
-
         self.card = np.zeros((70, 70, 3), np.uint8)
 
         self.map = Map()
         self.game_map_with_options = self.map.image.copy()
         self.options = list()
-        self.show_cam = tk.IntVar()
 
         self.root.title("Carcessonne")
         self.root.geometry(f"{self.map_size*70+200}x{self.map_size*70+20}+100+100")
@@ -31,14 +27,8 @@ class GUI:
         
         game_map = ImageTk.PhotoImage(image=Image.fromarray(self.map.image))
         card = ImageTk.PhotoImage(image=Image.fromarray(self.card))
-        frame = ImageTk.PhotoImage(image=Image.fromarray(self.camera.get_frame()))
 
-        tk.Checkbutton(self.root, text="Camera View", variable=self.show_cam, onvalue=1, offvalue=0, command=self.show_camera).place(x=10, y=10)
-        tk.Button(self.root, text="Update Map", command=self.map_from_camera).place(x=self.map_size*70-100, y=10)
-        if self.show_cam.get() == 0:
-            tk.Label(self.root, image=game_map).place(x=10, y=50)
-        else: 
-            tk.Label(self.root, image=frame).place(x=10, y=50)
+        tk.Label(self.root, image=game_map).place(x=10, y=10)
         tk.Button(self.root, text="Get Card", command=self.get_card).place(x=self.map_size*70+50, y=30)
         tk.Label(self.root, text="Your Card:").place(x=self.map_size*70+50, y=60)
         tk.Label(self.root, image=card).place(x=self.map_size*70+50, y=80)
@@ -52,7 +42,7 @@ class GUI:
         self.root.mainloop()
 
     def get_card(self):
-        self.card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards_2/card_{str(random.randint(0, 24)).zfill(2)}.png")), cv2.COLOR_BGR2RGB).astype('uint8')
+        self.card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards/card_{str(random.randint(0, 24)).zfill(2)}.png")), cv2.COLOR_BGR2RGB).astype('uint8')
         self.update_gui()
 
     def turn_card(self):
@@ -75,26 +65,11 @@ class GUI:
                 self.card = np.zeros((70, 70, 3), np.uint8)
         self.update_gui()
 
-    def show_camera(self):
-        self.update_gui()
-
-    def map_from_camera(self):
-        self.map.get_map_from_camera(self.camera.get_frame())
-        self.game_map_with_options = self.map.image.copy()
-        self.update_gui
-
-
-
     def update_gui(self):
-        card = Card(self.card)
         game_map = ImageTk.PhotoImage(image=Image.fromarray(self.game_map_with_options))
-        card = ImageTk.PhotoImage(image=Image.fromarray(card.image_with_features))
-        frame = ImageTk.PhotoImage(image=Image.fromarray(self.camera.get_frame()))
+        card = ImageTk.PhotoImage(image=Image.fromarray(self.card))
 
-        if self.show_cam.get() == 0:
-            tk.Label(self.root, image=game_map).place(x=10, y=50)
-        else: 
-            tk.Label(self.root, image=frame).place(x=10, y=50)
+        tk.Label(self.root, image=game_map).place(x=10, y=10)
         tk.Label(self.root, image=card).place(x=self.map_size*70+50, y=80)
 
         self.game_map_with_options = self.map.image.copy()

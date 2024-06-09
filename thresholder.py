@@ -12,6 +12,8 @@ def update(new):
     pass
  
 def main():
+    camera = cv2.VideoCapture(2)
+
     colors = ['lR', 'lG', 'lB', 'uR', 'uG', 'uB']
     value = [0, 0, 0, 255, 255, 255]
     bounds = {}
@@ -25,10 +27,14 @@ def main():
     n = 0
     while True:
         # image_rgb = cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards/card_{str(n).zfill(2)}.png"))
-        image_rgb = cv2.imread(os.path.join(SCRIPT_PATH, f"images/carcassonne_cards.png"))
+
+        # image_rgb = cv2.imread(os.path.join(SCRIPT_PATH, f"images/carcassonne_cards_2.png"))
+        ret, image_rgb = camera.read()
 
         image = cv2.cvtColor(image_rgb, cv2.COLOR_BGR2RGB)
         image = cv2.cvtColor(image, cv2.COLOR_RGB2HSV)
+
+        # image = np.zeros((70, 70, 3), np.uint8)
 
         # kernel = np.array([[-1,-1,-1], [-1,9,-1], [-1,-1,-1]])
         # image_grey = cv2.filter2D(image_grey, -1, kernel)
@@ -42,9 +48,10 @@ def main():
         out = cv2.inRange(image, lowerBounds, upperBounds)
 
         kernel = np.array([[0,1,0], [1,1,1], [0,1,0]], np.uint8)
-        # out = cv2.erode(out, kernel, iterations=1) 
+        out = cv2.erode(out, kernel, iterations=2) 
         # out = cv2.morphologyEx(out, cv2.MORPH_CLOSE, kernel)
-        out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
+        # out = cv2.erode(out, kernel, iterations=2) 
+        # out = cv2.morphologyEx(out, cv2.MORPH_OPEN, kernel)
         # out = cv2.dilate(out, kernel, iterations=2) 
 
         cv2.imshow("Out", out)

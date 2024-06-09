@@ -28,7 +28,7 @@ def put_sides(card, sides):
 def main():
     n = 0
     while True:
-        image = cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards/card_{str(n).zfill(2)}.png"))
+        image = cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards_2/card_{str(n).zfill(2)}.png"))
 
         sides = {
             "UP": "GRASS",
@@ -37,9 +37,12 @@ def main():
             "LEFT": "GRASS"
         }
 
-        sides = features.find_castle(image, sides)
-        sides = features.find_road(image, sides)
+        sides, thresh_castle = features.find_castle(image, sides)
+        sides, thresh_road = features.find_road(image, sides)
         out = put_sides(image.copy(), sides)
+
+        cv2.imshow("Thresh Castle", thresh_castle)
+        cv2.imshow("Thresh Road", thresh_road)
 
         cv2.imshow("Out", out)
         cv2.imshow("Original", image)
