@@ -69,8 +69,8 @@ class Map:
     def get_map_from_camera(self, image):
         row, col, c = image.shape
 
-        for x in range(0, row-70, 70):
-            for y in range(0, col-70, 70):
+        for x in range(0, row-69, 70):
+            for y in range(0, col-69, 70):
                 card = image[x:x+70, y:y+70, :]
                 card_coords = (y ,x)
                 self.update_map(card, card_coords)

@@ -9,13 +9,14 @@ from Map import Map
 from Camera import Camera
 from tkinter import ttk
 
-
-
 SCRIPT_PATH = os.path.dirname(__file__)
 
 class GUI:
     def __init__(self, map_size=11) -> None:
         self.map_size = map_size
+        self.computer_turn = True
+        self.error_txt = False
+        self.card_pile = list(np.repeat(np.arange(0, 24), 3))
 
         self.root = tk.Tk()
 
@@ -60,11 +61,19 @@ class GUI:
         )
         self.combo.place(x=self.map_size*70+50, y=330)
 
+        tk.Button(self.root, text="Computer Move", command=self.computer_move).place(x=self.map_size*70+50, y=360)
+
         self.update_gui()
         self.root.mainloop()
 
     def get_card(self):
-        self.card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards_2/card_{str(random.randint(0, 24)).zfill(2)}.png")), cv2.COLOR_BGR2RGB).astype('uint8')
+        if self.error_txt:
+            self.error_txt.destroy()
+            self.error_txt = False
+        
+        number = int(random.choices(self.card_pile)[0])
+        self.card_pile.pop(number)
+        self.card = cv2.cvtColor(cv2.imread(os.path.join(SCRIPT_PATH, f"images/cards_2/card_{str(number).zfill(2)}.png")), cv2.COLOR_BGR2RGB).astype('uint8')
         self.game_map_with_options = self.map.image.copy()
 
     def turn_card(self):
@@ -114,6 +123,34 @@ class GUI:
         self.card_label.card = card
 
         self.root.after(100, self.update_gui)
+
+    def computer_move(self):
+        found_options = False
+        self.get_card()
+        for _ in range(4):
+            self.display_options()
+            if len(self.options) > 0:
+                found_options = True
+                break
+            else:
+                self.turn_card()
+
+        if found_options:
+            if len(self.options) > 1:
+                number = int(random.choices(range(1, len(self.options)))[0])
+            else: 
+                number = 1
+            self.map.update_map(self.card, self.options[number-1])
+            self.game_map_with_options = self.map.image.copy()
+            self.card = np.zeros((70, 70, 3), np.uint8)
+        else:
+            self.error_txt = tk.Label(self.root, text="No Place Options Found!", fg="red")
+            self.error_txt.place(x=self.map_size*70+50, y=400)
+
+        
+
+
+
             
 
 
